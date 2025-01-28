@@ -11,3 +11,11 @@ export const fetchShowsByQuery = async (query: string): Promise<Show[]> => {
 
   return searchResults.map((result) => result.show);
 };
+
+export const fetchShowById = async (showId: string): Promise<Show> => {
+  const res = await fetch(`https://api.tvmaze.com/shows/${showId}?embed=episodes`);
+
+  if (!res.ok) throw new Error(`Failed to fetch show with id ${showId}`);
+
+  return res.json();
+};
