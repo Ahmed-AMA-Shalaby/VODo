@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import placeholderImage from '@/assets/placeholder.png';
 import { Episode } from '@/models/episode';
@@ -50,17 +50,17 @@ const EpisodeDetails = ({ initialEpisode, showId }: EpisodeDetailsProps): React.
    * - The previous episode (if available).
    * - The next episode (if available).
    */
-  useEffect(() => {
-    const updateEpisode = async (): Promise<void> => {
-      const { episode, prevEpisode, nextEpisode } = await fetchEpisodeDetails(showId, episodeId);
+  const updateEpisode = useCallback(async (): Promise<void> => {
+    const { episode, prevEpisode, nextEpisode } = await fetchEpisodeDetails(showId, episodeId);
 
-      setEpisode(episode);
-      setPrevEpisode(prevEpisode);
-      setNextEpisode(nextEpisode);
-    };
-
-    updateEpisode();
+    setEpisode(episode);
+    setPrevEpisode(prevEpisode);
+    setNextEpisode(nextEpisode);
   }, [episodeId, showId]);
+
+  useEffect(() => {
+    updateEpisode();
+  }, [updateEpisode]);
 
   return (
     <div className={styles.container}>

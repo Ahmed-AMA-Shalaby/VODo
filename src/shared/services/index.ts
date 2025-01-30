@@ -1,3 +1,5 @@
+import { cache } from 'react';
+
 import { Episode } from '@/models/episode';
 import { Show } from '@/models/show';
 
@@ -31,13 +33,13 @@ export const fetchShowsByQuery = async (query: string): Promise<Show[]> => {
  * @param {string} showId - The ID of the show to fetch.
  * @returns {Promise<Show>} The fetched show details.
  */
-export const fetchShowById = async (showId: string): Promise<Show> => {
+export const fetchShowById = cache(async (showId: string): Promise<Show> => {
   const res = await fetch(`https://api.tvmaze.com/shows/${showId}?embed=episodes`);
 
   if (!res.ok) throw new Error(`Failed to fetch show with id ${showId}`);
 
   return res.json();
-};
+});
 
 /**
  * Fetches details of a specific episode along with its previous and next episodes.
@@ -49,35 +51,37 @@ export const fetchShowById = async (showId: string): Promise<Show> => {
  * @param {string} episodeId - The ID of the episode to fetch.
  * @returns {Promise<{ episode: Episode; prevEpisode?: Episode; nextEpisode?: Episode }>} The fetched episode details and optionally the previous/next episodes.
  */
-export const fetchEpisodeDetails = async (
-  showId: string,
-  episodeId: string,
-): Promise<{ episode: Episode; prevEpisode?: Episode; nextEpisode?: Episode }> => {
-  const episodeRes = await fetch(`https://api.tvmaze.com/episodes/${episodeId}`);
+export const fetchEpisodeDetails = cache(
+  async (
+    showId: string,
+    episodeId: string,
+  ): Promise<{ episode: Episode; prevEpisode?: Episode; nextEpisode?: Episode }> => {
+    const episodeRes = await fetch(`https://api.tvmaze.com/episodes/${episodeId}`);
 
-  if (!episodeRes.ok) {
-    throw new Error(`Failed to fetch episode details: ${episodeRes.status} ${episodeRes.statusText}`);
-  }
+    if (!episodeRes.ok) {
+      throw new Error(`Failed to fetch episode details: ${episodeRes.status} ${episodeRes.statusText}`);
+    }
 
-  const episode: Episode = await episodeRes.json();
+    const episode: Episode = await episodeRes.json();
 
-  let prevEpisode, nextEpisode;
+    let prevEpisode, nextEpisode;
 
-  // Fetch the previous episode if it exists
-  if (episode.number > 1) {
-    const prevRes = await fetch(
-      `https://api.tvmaze.com/shows/${showId}/episodebynumber?season=${episode.season}&number=${episode.number - 1}`,
+    // Fetch the previous episode if it exists
+    if (episode.number > 1) {
+      const prevRes = await fetch(
+        `https://api.tvmaze.com/shows/${showId}/episodebynumber?season=${episode.season}&number=${episode.number - 1}`,
+      );
+
+      if (prevRes.ok) prevEpisode = await prevRes.json();
+    }
+
+    // Fetch the next episode if it exists
+    const nextRes = await fetch(
+      `https://api.tvmaze.com/shows/${showId}/episodebynumber?season=${episode.season}&number=${episode.number + 1}`,
     );
 
-    if (prevRes.ok) prevEpisode = await prevRes.json();
-  }
+    if (nextRes.ok) nextEpisode = await nextRes.json();
 
-  // Fetch the next episode if it exists
-  const nextRes = await fetch(
-    `https://api.tvmaze.com/shows/${showId}/episodebynumber?season=${episode.season}&number=${episode.number + 1}`,
-  );
-
-  if (nextRes.ok) nextEpisode = await nextRes.json();
-
-  return { episode, prevEpisode, nextEpisode };
-};
+    return { episode, prevEpisode, nextEpisode };
+  },
+);
