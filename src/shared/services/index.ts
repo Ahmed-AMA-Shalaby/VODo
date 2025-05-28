@@ -4,6 +4,45 @@ import { Episode } from '@/models/episode';
 import { Show } from '@/models/show';
 
 /**
+ * Fetches a paginated list of TV shows from the TVMaze API.
+ *
+ * - Calls the TVMaze API to retrieve shows for a specific page.
+ * - Also fetches the previous and next pages of shows if they exist.
+ *
+ * @param {number} pageNumber - The page number to fetch shows for.
+ * @returns {Promise<{ shows?: Show[]; prevShows?: Show[]; nextShows?: Show[] }>} An object containing the shows for the requested page, and optionally the previous and next pages.
+ */
+export const fetchShowsByPage = async (
+  pageNumber: number,
+): Promise<{ shows?: Show[]; prevShows?: Show[]; nextShows?: Show[] }> => {
+  const showsRes = await fetch(`https://api.tvmaze.com/shows?page=${pageNumber}`);
+
+  if (!showsRes.ok) {
+    if (showsRes.status === 404) {
+      return { shows: undefined, prevShows: undefined, nextShows: undefined };
+    }
+
+    throw new Error(`Failed to fetch paginated shows: ${showsRes.status} ${showsRes.statusText}`);
+  }
+
+  const shows: Show[] = await showsRes.json();
+
+  let prevShows, nextShows;
+
+  // Fetch the previous shows if they exists
+  const prevRes = await fetch(`https://api.tvmaze.com/shows?page=${pageNumber - 1}`);
+
+  if (prevRes.ok) prevShows = await prevRes.json();
+
+  // Fetch the next shows if they exists
+  const nextRes = await fetch(`https://api.tvmaze.com/shows?page=${pageNumber + 1}`);
+
+  if (nextRes.ok) nextShows = await nextRes.json();
+
+  return { shows, prevShows, nextShows };
+};
+
+/**
  * Fetches a list of TV shows based on a search query.
  *
  * - Calls the TVMaze API to retrieve matching shows.

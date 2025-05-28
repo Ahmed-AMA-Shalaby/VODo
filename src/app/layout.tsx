@@ -1,6 +1,6 @@
 import './globals.css';
 
-import Link from 'next/link';
+import Header from 'src/app';
 
 import styles from './styles.module.scss';
 
@@ -23,7 +23,6 @@ type Props = {
 /**
  * Root layout component that wraps the entire application.
  * It includes:
- * - A **header** with the VODo logo.
  * - A **main** section where the routed page content is rendered.
  * - A **footer** displaying copyright information.
  *
@@ -34,14 +33,7 @@ const RootLayout = ({ children }: Props): React.JSX.Element => {
   return (
     <html lang='en'>
       <body suppressHydrationWarning>
-        {/* Header Section with Logo */}
-        <header className={styles.header}>
-          <div className={styles.logoContainer}>
-            <Link href='/' className={styles.logo}>
-              VODo
-            </Link>
-          </div>
-        </header>
+        <Header />
 
         {/* Main Content Section */}
         <main className={styles.main}>{children}</main>

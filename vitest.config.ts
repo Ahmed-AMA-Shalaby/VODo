@@ -11,13 +11,14 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@/app': path.resolve(__dirname, './src/app'),
       '@/pages': path.resolve(__dirname, './src/app/(pages)'),
       '@/assets': path.resolve(__dirname, './src/shared/assets'),
       '@/components': path.resolve(__dirname, './src/shared/components'),
       '@/models': path.resolve(__dirname, './src/shared/models'),
       '@/services': path.resolve(__dirname, './src/shared/services'),
-      '@/utils/*': path.resolve(__dirname, './src/shared/utils/*'),
-      '@/tests/*': path.resolve(__dirname, './tests/*'),
+      '@/utils': path.resolve(__dirname, './src/shared/utils'),
+      '@/tests': path.resolve(__dirname, './tests'),
     },
   },
 });

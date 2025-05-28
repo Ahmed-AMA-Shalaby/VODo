@@ -44,9 +44,9 @@ export const generateMetadata = async ({ params }: EpisodeDetailsProps): Promise
  */
 const EpisodeDetailsController = async ({ params }: EpisodeDetailsProps): Promise<React.JSX.Element> => {
   const { showId, episodeId } = await params;
-  const { episode } = await fetchEpisodeDetails(showId, episodeId);
+  const { episode, prevEpisode, nextEpisode } = await fetchEpisodeDetails(showId, episodeId);
 
-  return <EpisodeDetails initialEpisode={episode} showId={showId} />;
+  return <EpisodeDetails episode={episode} prevEpisode={prevEpisode} nextEpisode={nextEpisode} showId={showId} />;
 };
 
 export default EpisodeDetailsController;
