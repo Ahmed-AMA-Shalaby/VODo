@@ -56,20 +56,22 @@ const ShowDetails = ({ show }: ShowDetailsProps): React.JSX.Element => {
   return (
     <div className={styles.container}>
       {/* Back to All Shows button */}
-      <Link href={'/shows'} className={styles.backButton}>
+      <Link href={'/shows?page=0'} className={styles.backButton}>
         ⬅ Back to All Shows
       </Link>
 
       {/* Show header with cover image and description */}
       <div className={styles.header}>
-        <Image
-          src={show.image?.original || placeholderImage.src}
-          alt={`${show.name} cover`}
-          width={400}
-          height={600}
-          className={styles.cover}
-          priority
-        />
+        <div className={styles.coverWrapper}>
+          <Image
+            src={show.image?.original || placeholderImage.src}
+            alt={`${show.name} cover`}
+            fill
+            className={styles.cover}
+            priority
+            sizes='(max-width: 600px) 90vw, 350px'
+          />
+        </div>
 
         <div className={styles.details}>
           <h1 className={styles.title}>{show.name}</h1>

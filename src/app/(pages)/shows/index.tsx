@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 import placeholderImage from '@/assets/placeholder.png';
 import { Show } from '@/models/show';
@@ -10,10 +11,16 @@ import styles from './styles.module.scss';
 
 /**
  * Props type for the `Shows` component.
- * @property {Show[]} shows - Array of TV shows to be displayed.
+ * @property {number} page - Page number for pagination.
+ * @property {Show[]} shows - Optional array of TV shows to be displayed.
+ * @property {Show[]} nextShows - Optional array of next shows for pagination.
+ * @property {Show[]} prevShows - Optional array of previous shows for pagination.
  */
 interface ShowsProps {
-  shows: Show[];
+  page: number;
+  shows?: Show[];
+  nextShows?: Show[];
+  prevShows?: Show[];
 }
 
 /**
@@ -26,13 +33,16 @@ interface ShowsProps {
  * @param {ShowsProps} shows - List of shows to render.
  * @returns {React.JSX.Element} A grid of clickable show cards.
  */
-const Shows = ({ shows }: ShowsProps): React.JSX.Element => {
+const Shows = ({ page, shows, nextShows, prevShows }: ShowsProps): React.JSX.Element => {
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query') || '';
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>All Shows</h1>
 
       <ul className={styles.showList}>
-        {shows.map((show) => (
+        {shows?.map((show) => (
           <li key={show.id} className={styles.showItem}>
             {/* Clickable card linking to show details */}
             <Link href={`/shows/${show.id}`} className={styles.card}>
@@ -40,10 +50,10 @@ const Shows = ({ shows }: ShowsProps): React.JSX.Element => {
               <Image
                 src={show.image?.original || placeholderImage.src}
                 alt={show.name}
-                width={200}
-                height={250}
+                fill
                 className={styles.image}
                 priority
+                sizes='(max-width: 600px) 100vw, (max-width: 900px) 50vw, (max-width: 1200px) 33vw, 25vw'
               />
               {/* Overlay displaying the show name on hover */}
               <div className={styles.overlay}>
@@ -53,6 +63,30 @@ const Shows = ({ shows }: ShowsProps): React.JSX.Element => {
           </li>
         ))}
       </ul>
+
+      {/* No results messages */}
+      {!query && (!shows || shows.length === 0) && <p className={styles.noShowsMessage}>No shows available.</p>}
+
+      {query && shows && shows.length === 0 && (
+        <p className={styles.noShowsMessage}>{`No shows found for "${query}". Please try a different search term.`}</p>
+      )}
+
+      {/* Previous & Next Shows Navigation */}
+      <div className={styles.navigation}>
+        <Link
+          href={`/shows?page=${page - 1}`}
+          className={`${styles.navLink} ${(!prevShows || query) && styles.hiddenNavLink}`}
+        >
+          ⬅ Previous
+        </Link>
+
+        <Link
+          href={`/shows?page=${page + 1}`}
+          className={`${styles.navLink} ${(!nextShows || query) && styles.hiddenNavLink}`}
+        >
+          Next ➡
+        </Link>
+      </div>
     </div>
   );
 };

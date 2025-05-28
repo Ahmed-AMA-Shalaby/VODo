@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation';
 
 /**
- * Homepage component that redirects users to the Shows page.
+ * Home component that immediately redirects users to the shows page with the first page selected.
+ * Utilizes the `redirect` function to navigate to `/shows?page=0`.
  *
- * This ensures that when users visit the root URL (`/`), they are
- * automatically taken to the `/shows` page, where all available shows are listed.
+ * @returns {void} This component does not render any JSX; it only performs a redirect.
  */
 const Home = (): void => {
-  redirect('/shows');
+  redirect('/shows?page=0');
 };
 
 export default Home;

@@ -21,7 +21,7 @@ const mockEpisode: Episode = {
 
 describe('EpisodeDetails Component', () => {
   test('renders episode details', () => {
-    render(<EpisodeDetails initialEpisode={mockEpisode} showId='1' />);
+    render(<EpisodeDetails episode={mockEpisode} showId='1' />);
 
     expect(screen.getByText('Episode 1')).toBeInTheDocument();
     expect(screen.getByText('Episode 1 | 30 min')).toBeInTheDocument();

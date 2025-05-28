@@ -2,22 +2,23 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 
 import placeholderImage from '@/assets/placeholder.png';
 import { Episode } from '@/models/episode';
-import { fetchEpisodeDetails } from '@/services';
 
 import styles from './styles.module.scss';
 
 /**
  * Props type for the Episode Details component.
- * @property {Episode} initialEpisode - The initial episode data received from the server.
+ * @property {Episode} episode - The current episode data received from the server.
+ * @property {Episode} prevEpisode - The previous episode data, if available.
+ * @property {Episode} nextEpisode - The next episode data, if available.
  * @property {string} showId - The ID of the parent show.
  */
 interface EpisodeDetailsProps {
-  initialEpisode: Episode;
+  episode: Episode;
+  prevEpisode?: Episode;
+  nextEpisode?: Episode;
   showId: string;
 }
 
@@ -34,34 +35,7 @@ interface EpisodeDetailsProps {
  * @param {string} showId - The show ID to fetch related episodes.
  * @returns {React.JSX.Element} The structured Episode Details page.
  */
-const EpisodeDetails = ({ initialEpisode, showId }: EpisodeDetailsProps): React.JSX.Element => {
-  const params = useParams();
-  const { episodeId } = params as { episodeId: string };
-
-  // State to store the current episode, previous episode, and next episode
-  const [episode, setEpisode] = useState<Episode>(initialEpisode);
-  const [prevEpisode, setPrevEpisode] = useState<Episode | undefined>(undefined);
-  const [nextEpisode, setNextEpisode] = useState<Episode | undefined>(undefined);
-
-  /**
-   * Fetches updated episode details when the episode ID or show ID changes.
-   * Retrieves:
-   * - The current episode.
-   * - The previous episode (if available).
-   * - The next episode (if available).
-   */
-  const updateEpisode = useCallback(async (): Promise<void> => {
-    const { episode, prevEpisode, nextEpisode } = await fetchEpisodeDetails(showId, episodeId);
-
-    setEpisode(episode);
-    setPrevEpisode(prevEpisode);
-    setNextEpisode(nextEpisode);
-  }, [episodeId, showId]);
-
-  useEffect(() => {
-    updateEpisode();
-  }, [updateEpisode]);
-
+const EpisodeDetails = ({ episode, prevEpisode, nextEpisode, showId }: EpisodeDetailsProps): React.JSX.Element => {
   return (
     <div className={styles.container}>
       {/* Back to Show button */}
@@ -74,10 +48,10 @@ const EpisodeDetails = ({ initialEpisode, showId }: EpisodeDetailsProps): React.
         <Image
           src={episode.image?.original || placeholderImage.src}
           alt={episode.name}
-          width={800}
-          height={450}
+          fill
           className={styles.cover}
           priority
+          sizes='(max-width: 800px) 90vw, 800px'
         />
       </div>
 
@@ -94,17 +68,19 @@ const EpisodeDetails = ({ initialEpisode, showId }: EpisodeDetailsProps): React.
 
       {/* Previous & Next Episode Navigation */}
       <div className={styles.navigation}>
-        {prevEpisode && (
-          <Link href={`/shows/${showId}/episodes/${prevEpisode.id}`} className={styles.navLink}>
-            ⬅ Previous
-          </Link>
-        )}
+        <Link
+          href={`/shows/${showId}/episodes/${prevEpisode?.id}`}
+          className={`${styles.navLink} ${!prevEpisode && styles.hiddenNavLink}`}
+        >
+          ⬅ Previous
+        </Link>
 
-        {nextEpisode && (
-          <Link href={`/shows/${showId}/episodes/${nextEpisode.id}`} className={styles.navLink}>
-            Next ➡
-          </Link>
-        )}
+        <Link
+          href={`/shows/${showId}/episodes/${nextEpisode?.id}`}
+          className={`${styles.navLink} ${!nextEpisode && styles.hiddenNavLink}`}
+        >
+          Next ➡
+        </Link>
       </div>
     </div>
   );
